@@ -1,7 +1,6 @@
-from uuid import uuid4
-
 import pytest
 import sqlalchemy
+from sqlalchemy import desc, func
 
 from learning_group.database import Book, Database, User
 from testcontainers.postgres import PostgresContainer
@@ -51,6 +50,14 @@ def test_tables(db_engine):
 
     with db.session_factory.begin() as session:
         assert session.query(User).count() == 2
+        count_books_by_author = (
+            session.query(User.name, func.count().label("book_count"))
+            .join(Book)
+            .group_by(User.name)
+            .order_by(desc("book_count"))
+            .all()
+        )
+        assert count_books_by_author == [("Stephen King", 4), ("Tolkien", 3)]
 
 
 def test_empty_tables(db_engine):

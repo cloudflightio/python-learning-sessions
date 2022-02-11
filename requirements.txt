@@ -1,1 +1,2 @@
-testcontainers
+testcontainers[postgresql]
+pytest
