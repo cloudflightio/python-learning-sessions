@@ -6,6 +6,9 @@ from learning_group.database import Book, Database, User
 from testcontainers.postgres import PostgresContainer
 
 
+# better would be `fixture(scope="session")`, otherwise the Docker container
+# will restarts for every testcase.
+# However you need to manually delete all data in the database after each testcase for it to work.
 @pytest.fixture
 def db_engine():
     with PostgresContainer("postgres:13") as postgres:
