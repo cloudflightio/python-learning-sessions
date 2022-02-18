@@ -1,4 +1,9 @@
-# Example for testcontainers + sqlalchemy
+# testcontainers + sqlalchemy
+
+A small example on how to work with `testcontainers` and `sqlalchemy`.
+Presented and discussed in an internal Cloudflight Python learning session.
+
+## Instructions
 
 ```sh
 # virtual environment
