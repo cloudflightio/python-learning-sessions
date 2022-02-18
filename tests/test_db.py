@@ -2,26 +2,36 @@ import pytest
 import sqlalchemy
 from sqlalchemy import desc, func
 
-from learning_group.database import Book, Database, User
+from learning_group.database import Base, Book, Database, User
 from testcontainers.postgres import PostgresContainer
 
 
-# better would be `fixture(scope="session")`, otherwise the Docker container
-# will restarts for every testcase.
-# However you need to manually delete all data in the database after each testcase for it to work.
-@pytest.fixture
+@pytest.fixture(scope="session")
 def db_engine():
     with PostgresContainer("postgres:13") as postgres:
         engine = sqlalchemy.create_engine(postgres.get_connection_url())
         (version,) = engine.execute("select version()").fetchone()
-        print(version)  # 5.7.17
+        print(version)
+
+        # remove all tables and data
+        Base.metadata.drop_all(engine)
+
         yield engine
 
 
-def test_abc(db_engine):
-    db_engine.execute("create table a (x integer, y integer);")
-    db_engine.execute("INSERT INTO a (x, y) VALUES (1, 2);")
-    value = db_engine.execute("select y from a limit 1;").fetchone()
+@pytest.fixture
+def empty_db_engine(db_engine):
+    # remove all tables and data
+    Base.metadata.drop_all(db_engine)
+
+    yield db_engine
+
+
+def test_abc(empty_db_engine):
+    engine = empty_db_engine
+    engine.execute("create table a (x integer, y integer);")
+    engine.execute("INSERT INTO a (x, y) VALUES (1, 2);")
+    value = engine.execute("select y from a limit 1;").fetchone()
     assert value[0] == 2
 
 
@@ -47,8 +57,8 @@ def fill_with_test_data(db):
         )
 
 
-def test_tables(db_engine):
-    db = Database(db_engine)
+def test_tables(empty_db_engine):
+    db = Database(empty_db_engine)
     fill_with_test_data(db)
 
     with db.session_factory.begin() as session:
@@ -63,7 +73,7 @@ def test_tables(db_engine):
         assert count_books_by_author == [("Stephen King", 4), ("Tolkien", 3)]
 
 
-def test_empty_tables(db_engine):
-    db = Database(db_engine)
+def test_empty_tables(empty_db_engine):
+    db = Database(empty_db_engine)
     with db.session_factory.begin() as session:
         assert session.query(Book).count() == 0
