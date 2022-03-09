@@ -1,16 +1,3 @@
-# testcontainers + sqlalchemy
+# Python Learning Sessions
 
-A small example on how to work with `testcontainers` and `sqlalchemy`.
-Presented and discussed in an internal Cloudflight Python learning session.
-
-## Instructions
-
-```sh
-# virtual environment
-python -m venv .venv
-source .venv/bin/activate
-# install dependencies
-pip install -r requirements.txt
-# run tests
-pytest
-```
+Small Python snippets, examples and demo projects, that are presented and discussed in our internal Cloudflight Python Learning Sessions.
